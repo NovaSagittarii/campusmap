@@ -81,7 +81,7 @@ function MainPage() {
           TEST_BUILDING.layers.map((layer, i) => {
             return (
               <group key={i}>
-                {polygonMesh(layer.floor, layer.name, i * 50, "red")}
+                {polygonMesh(layer.floor, layer.name, i * 50, "darkred")}
                 <group>
                   {
                     layer.rooms.map((room, j) => {
