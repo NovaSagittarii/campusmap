@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { Model, aParams } from '../assets/Model'
 import { randFloat, randInt } from "three/src/math/MathUtils.js";
 import { Polygon, TEST_BUILDING } from "../types";
-import { CHUNG, L1G, L2G } from "../data";
+import { CHUNG, L1G, L2G, L12GS } from "../data";
 import { Text } from "@react-three/drei";
 import { POI, FloorPlan } from "../floorPlan";
 import { UnrealBloomPass } from 'three-stdlib'
@@ -37,9 +37,9 @@ const polygonMesh = (polygon: Polygon, name: string, height: number, color: stri
   return (
     <>
       <mesh geometry={geometry} position={[0, height - 100, 0]} material={material} />
-      <Text position={[center.x, height - 92, center.y]} fontSize={20} color="white" anchorX="center" anchorY="middle">
+      <Text position={[center.x, height - 105, center.y]} fontSize={20} color="white" anchorX="center" anchorY="bottom" maxWidth={100} lineHeight={1} >
         {name}
-      </Text>
+      </Text >
     </>
   );
 }
@@ -90,6 +90,10 @@ for (let path of L2G.edges) {
   floorPlan.addEdge(POI2F[path[0]], POI2F[path[1]]);
   floorPlan.addEdge(POI2F[path[1]], POI2F[path[0]]);
 }
+for (let path of L12GS) {
+  floorPlan.addEdge(POI1F[path[0]], POI2F[path[1]]);
+  floorPlan.addEdge(POI2F[path[1]], POI1F[path[0]]);
+}
 
 for (var layer of CHUNG.layers) {
   for (var point of layer.floor.points) {
@@ -100,6 +104,17 @@ for (var layer of CHUNG.layers) {
     for (var point of room.polygon.points) {
       point.x -= 300;
       point.y -= 400;
+      // find nearest POI
+      var minDist = Infinity;
+      var minPOI = null;
+      for (var poi of floorPlan.pois) {
+        var dist = Math.sqrt((poi.location[0] - point.x) ** 2 + (poi.location[2] - point.y) ** 2);
+        if (dist < minDist) {
+          minDist = dist;
+          minPOI = poi;
+        }
+      }
+      poi!.name = room.name;
     }
   }
 }
