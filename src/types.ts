@@ -69,6 +69,13 @@ export function createBuilding(name: string, x: number, y: number) {
   };
 }
 
+export interface Graph {
+  /** positions of points, the ith node has a position of position[i] */
+  positions: Point[];
+  /** list of edges between nodes (0-indexed!) */
+  edges: [number, number][];
+}
+
 /**
  * Utility function that generates a rectangular Polygon
  */
