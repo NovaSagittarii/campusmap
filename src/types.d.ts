@@ -5,6 +5,9 @@ export interface Point {
   x: number;
   y: number;
 }
+export function createPoint(x: number, y: number) {
+  return { x, y } as Point;
+}
 
 /**
  * Polygon container, consists of points
@@ -23,6 +26,12 @@ export interface Room {
   name: string;
   polygon: Polygon;
 }
+export function createRoom(name: string, x: number, y: number) {
+  return {
+    name: name,
+    polygon: rect(x, y, 10, 10),
+  } as Room;
+}
 
 /**
  * Container that consists of a floor boundary and many rooms.
@@ -32,19 +41,32 @@ export interface Layer {
   rooms: Room[];
   floor: Polygon;
 }
+export function createLayer(name: string) {
+  return {
+    name: name,
+    rooms: [],
+    floor: rect(0, 0, 100, 100),
+  } as Layer;
+}
 
 /**
  * Container that consists of multiple building layers.
  */
 export interface Building {
   name: string;
+
+  /**
+   * positional offset relative to other buildings
+   */
+  offset: Point;
   layers: Layer[];
 }
+// export function createBuilding() {}
 
 /**
  * Utility function that generates a rectangular Polygon
  */
-function rect(x: number, y: number, w: number, h: number) {
+export function rect(x: number, y: number, w: number, h: number) {
   return {
     points: [
       [0, 0],
@@ -63,6 +85,7 @@ function rect(x: number, y: number, w: number, h: number) {
  */
 export const TEST_BUILDING: Building = {
   name: "test",
+  offset: { x: 0, y: 0 },
   layers: [
     {
       name: "1F",
