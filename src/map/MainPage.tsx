@@ -12,6 +12,8 @@ import { POI, FloorPlan } from "../floorPlan";
 import { UnrealBloomPass } from 'three-stdlib'
 import { Effects } from "@react-three/drei";
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass'
+import Dome from "./Dome";
+import Floor from "./Floor";
 
 extend({ UnrealBloomPass, OutputPass });
 
@@ -235,6 +237,10 @@ function MainPage() {
         <ambientLight intensity={0.5} />
         <directionalLight color="white" position={[0, 0, 5]} />
         <directionalLight color="white" position={[0, 5, 5]} />
+        <Dome />
+        <group position={[0, -105, 0]} rotation={[-Math.PI/2, 0, 0]}>
+          <Floor />
+        </group>
 
         {/* </PresentationControls> */}
       </Canvas>
