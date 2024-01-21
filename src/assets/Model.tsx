@@ -15,7 +15,7 @@ export class aParams {
   currPOI: POI | null = null;
   targetPOI: POI | null = null;
   velocity: [number, number, number] = [0, 0, 0];
-  maxVelocity: number = 200;
+  maxVelocity: number = 100;
   rotationForce: [number, number, number] = [0, 0, 0];
   headRotationForce: [number, number, number] = [0, 0, 0];
   status: string = "idle";
@@ -39,9 +39,9 @@ export function Model({ animationParams, ...props }: ModelProps) {
     // hairRef.current.rotation.y += 0.01;
     // hairRef.current.rotation.x += 0.01;
     // hairRef.current.rotation.z += 0.01;
-    bodyRef.current.rotation.x += animationParams.current.rotationForce[0];
-    bodyRef.current.rotation.y += animationParams.current.rotationForce[1];
-    bodyRef.current.rotation.z += animationParams.current.rotationForce[2];
+    // bodyRef.current.rotation.x += animationParams.current.rotationForce[0];
+    // bodyRef.current.rotation.y += animationParams.current.rotationForce[1];
+    // bodyRef.current.rotation.z += animationParams.current.rotationForce[2];
     if (animationParams.current.status === "moveTo") {
       const dx = animationParams.current.destination[0] - bodyRef.current.position.x;
       const dy = animationParams.current.destination[1] - bodyRef.current.position.y;
@@ -61,6 +61,8 @@ export function Model({ animationParams, ...props }: ModelProps) {
       bodyRef.current.position.x += Math.min(Math.abs(animationParams.current.velocity[0] * delta), Math.abs(dx)) * Math.sign(dx);
       bodyRef.current.position.y += Math.min(Math.abs(animationParams.current.velocity[1] * delta), Math.abs(dy)) * Math.sign(dy);
       bodyRef.current.position.z += Math.min(Math.abs(animationParams.current.velocity[2] * delta), Math.abs(dz)) * Math.sign(dz);
+
+      bodyRef.current.rotation.y = Math.atan2(animationParams.current.velocity[0], animationParams.current.velocity[2]) - Math.PI / 2;
     }
   });
 
