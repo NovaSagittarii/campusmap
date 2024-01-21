@@ -39,7 +39,7 @@ const polygonMesh = (polygon: Polygon, name: string, height: number, color: stri
   return (
     <>
       <mesh geometry={geometry} position={[0, height - 100, 0]} material={material} />
-      <Text position={[center.x, height - 105, center.y]} fontSize={20} color="white" anchorX="center" anchorY="bottom" maxWidth={100} lineHeight={1} >
+      <Text position={[center.x, height - 105, center.y]} fontSize={20} color="black" anchorX="center" anchorY="bottom" maxWidth={100} lineHeight={1} >
         {name}
       </Text >
     </>
@@ -238,7 +238,7 @@ function MainPage() {
         <directionalLight color="white" position={[0, 0, 5]} />
         <directionalLight color="white" position={[0, 5, 5]} />
         <Dome />
-        <group position={[0, -105, 0]} rotation={[-Math.PI/2, 0, 0]}>
+        <group position={[0, -105, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <Floor />
         </group>
 
