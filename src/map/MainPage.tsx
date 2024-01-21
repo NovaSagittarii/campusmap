@@ -21,7 +21,7 @@ const temp = new THREE.Object3D();
 const material = new THREE.MeshPhongMaterial({ color: "red" });
 material.side = THREE.DoubleSide;
 const geometry = new THREE.SphereGeometry(1.0);
-const polygonMesh = (polygon: Polygon, name: string, height: number, color: string) => {
+const polygonMesh = (polygon: Polygon, name: string, height: number, color: string, bgVisible: boolean) => {
   var shape = new THREE.Shape(polygon.points.map((point) => new THREE.Vector2(point.x, point.y)));
   var center = shape.getPoints().reduce((acc, point) => acc.add(point), new THREE.Vector2(0, 0)).divideScalar(shape.getPoints().length);
   var geometry = new THREE.ShapeGeometry(shape);
@@ -30,6 +30,11 @@ const polygonMesh = (polygon: Polygon, name: string, height: number, color: stri
   material.toneMapped = false;
   material.emissive = new THREE.Color(color);
   material.emissiveIntensity = 10;
+  let textColor = "black";
+  if (!bgVisible) {
+    material.emissiveIntensity = 13;
+    textColor = "white";
+  }
   if (color == "green") {
     material.wireframe = true;
   }
@@ -38,12 +43,14 @@ const polygonMesh = (polygon: Polygon, name: string, height: number, color: stri
   return (
     <>
       <mesh geometry={geometry} position={[0, height - 100, 0]} material={material} />
-      <Text position={[center.x, height - 105, center.y]} fontSize={20} color="black" anchorX="center" anchorY="bottom" maxWidth={100} lineHeight={1} >
+      <Text position={[center.x, height - 105, center.y]} fontSize={20} color={textColor} anchorX="center" anchorY="bottom" maxWidth={100} lineHeight={1} >
         {name}
       </Text >
     </>
   );
 }
+
+
 const Balls = ({ locations }: { locations: [number, number][] }) => {
   const ref = useRef<THREE.InstancedMesh>(null);
 
@@ -151,13 +158,19 @@ document.addEventListener("keydown", (e) => {
       modelParams[0].current.status = "moveTo";
     }
   }
-  if (e.key === "g") {
-    getLocation();
-  }
 });
 
 function MainPage() {
 
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "=") {
+      if (bgVisible) {
+        setBgVisible(false);
+      }
+    }
+  });
+
+  const [bgVisible, setBgVisible] = useState(true);
   const [visibility, setVisibility] = useState<boolean[]>([true, true]);
   modelParams = [...new Array(100)].map((_) => {
     return useRef<aParams>(createAParams());
@@ -245,19 +258,19 @@ function MainPage() {
     <div className="w-full h-screen">
       <Canvas className="bg-black h-full">
         <Effects disableGamma>
-          <unrealBloomPass threshold={1} strength={0.3} radius={0.5} />
+          <unrealBloomPass threshold={1} strength={0.5} radius={0.5} />
         </Effects>
         {
           CHUNG.layers.map((layer, i) => {
             return (
               <group key={i} visible={visibility[i]} onPointerDown={() => setVisibility((prev) => prev.map((_, j) => j === i ? false : prev[j]))} onPointerUp={() => setVisibility((prev) => prev.map((_, j) => j === i ? true : prev[j]))}>
-                {polygonMesh(layer.floor, layer.name, i * 50, "darkred")}
+                {polygonMesh(layer.floor, layer.name, i * 50, "darkred", bgVisible)}
                 <group>
                   {
                     layer.rooms.map((room, j) => {
                       return (
                         <group key={j}>
-                          {polygonMesh(room.polygon, room.name, i * 50 + 5, "green")}
+                          {polygonMesh(room.polygon, room.name, i * 50 + 5, "green", bgVisible)}
                         </group>
                       );
                     })
@@ -281,9 +294,11 @@ function MainPage() {
         <ambientLight intensity={0.5} />
         <directionalLight color="white" position={[0, 0, 5]} />
         <directionalLight color="white" position={[0, 5, 5]} />
-        <Dome />
-        <group position={[0, -105, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <Floor />
+        <group visible={bgVisible}>
+          <Dome />
+          <group position={[0, -105, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <Floor />
+          </group>
         </group>
 
         {/* </PresentationControls> */}
