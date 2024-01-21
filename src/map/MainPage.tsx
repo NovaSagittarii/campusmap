@@ -8,9 +8,10 @@ const temp = new THREE.Object3D();
 const material = new THREE.MeshPhongMaterial({ color: "red" });
 const geometry = new THREE.SphereGeometry(1.0);
 const Balls = ({ locations }: { locations: [number, number][] }) => {
-  const ref = useRef<THREE.InstancedMesh>();
+  const ref = useRef<THREE.InstancedMesh>(null);
 
   useFrame(() => {
+    if (!ref || !ref.current) return;
     let counter = 0;
     for (const [x, y] of locations) {
       const id = counter++;
