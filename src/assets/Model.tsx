@@ -6,17 +6,15 @@ import React, { MutableRefObject, useRef } from "react";
 import { useGLTF } from "@react-three/drei";
 import { ThreeElements } from "@react-three/fiber";
 import { useFrame } from "@react-three/fiber";
+import { func } from "three/examples/jsm/nodes/Nodes.js";
 
-export type aParams = {
-  bodyRotationX: 0;
-  bodyRotationY: 0;
-  bodyRotationZ: 0;
-  headRotationX: 0;
-  headRotationY: 0;
-  headRotationZ: 0;
-  hairRotationX: 0;
-  hairRotationY: 0;
-  hairRotationZ: 0;
+export class aParams {
+  destination: [number, number, number] = [0, 0, 0];
+  velocity: [number, number, number] = [0, 0, 0];
+  maxVelocity: number = 10;
+  rotationForce: [number, number, number] = [0, 0, 0];
+  headRotationForce: [number, number, number] = [0, 0, 0];
+  status: string = "idle";
 }
 
 type ModelProps = ThreeElements["mesh"] & {
@@ -29,7 +27,7 @@ export function Model({ animationParams, ...props }: ModelProps) {
   const hairRef = useRef<THREE.Mesh>(null);
   const { nodes, materials } = useGLTF("/playermodel.gltf");
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (!headRef.current || !bodyRef.current || !hairRef.current) return;
     // headRef.current.rotation.y += 0.01;
     // headRef.current.rotation.x += 0.01;
@@ -37,9 +35,29 @@ export function Model({ animationParams, ...props }: ModelProps) {
     // hairRef.current.rotation.y += 0.01;
     // hairRef.current.rotation.x += 0.01;
     // hairRef.current.rotation.z += 0.01;
-    bodyRef.current.rotation.x = animationParams.current.bodyRotationX;
-    bodyRef.current.rotation.y = animationParams.current.bodyRotationY;
-    bodyRef.current.rotation.z = animationParams.current.bodyRotationZ;
+    bodyRef.current.rotation.x += animationParams.current.rotationForce[0];
+    bodyRef.current.rotation.y += animationParams.current.rotationForce[1];
+    bodyRef.current.rotation.z += animationParams.current.rotationForce[2];
+    if (animationParams.current.status === "moveTo") {
+      const dx = animationParams.current.destination[0] - bodyRef.current.position.x;
+      const dy = animationParams.current.destination[1] - bodyRef.current.position.y;
+      const dz = animationParams.current.destination[2] - bodyRef.current.position.z;
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (dist > 1) {
+        // use delta time clock.getDelta()
+        const vx = dx / dist * animationParams.current.maxVelocity;
+        const vy = dy / dist * animationParams.current.maxVelocity;
+        const vz = dz / dist * animationParams.current.maxVelocity;
+        animationParams.current.velocity = [vx, vy, vz];
+      } else {
+        animationParams.current.velocity = [0, 0, 0];
+        animationParams.current.status = "idle";
+      }
+
+      bodyRef.current.position.x += Math.min(Math.abs(animationParams.current.velocity[0] * delta), Math.abs(dx)) * Math.sign(dx);
+      bodyRef.current.position.y += Math.min(Math.abs(animationParams.current.velocity[1] * delta), Math.abs(dy)) * Math.sign(dy);
+      bodyRef.current.position.z += Math.min(Math.abs(animationParams.current.velocity[2] * delta), Math.abs(dz)) * Math.sign(dz);
+    }
   });
 
   return (
@@ -67,7 +85,7 @@ export function Model({ animationParams, ...props }: ModelProps) {
         position={[0, 0.812, 0]}
         scale={0.626}
       />
-    </group>
+    </group >
   );
 }
 
