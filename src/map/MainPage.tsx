@@ -12,6 +12,8 @@ import { POI, FloorPlan } from "../floorPlan";
 import { UnrealBloomPass } from 'three-stdlib'
 import { Effects } from "@react-three/drei";
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass'
+import Dome from "./Dome";
+import Floor from "./Floor";
 
 extend({ UnrealBloomPass, OutputPass });
 
@@ -37,7 +39,7 @@ const polygonMesh = (polygon: Polygon, name: string, height: number, color: stri
   return (
     <>
       <mesh geometry={geometry} position={[0, height - 100, 0]} material={material} />
-      <Text position={[center.x, height - 92, center.y]} fontSize={20} color="white" anchorX="center" anchorY="middle">
+      <Text position={[center.x, height - 92, center.y]} fontSize={20} color="black" anchorX="center" anchorY="middle">
         {name}
       </Text>
     </>
@@ -170,6 +172,10 @@ function MainPage() {
         <ambientLight intensity={0.5} />
         <directionalLight color="red" position={[0, 0, 5]} />
         <directionalLight color="red" position={[0, 5, 5]} />
+        <Dome />
+        <group position={[0, -105, 0]} rotation={[-Math.PI/2, 0, 0]}>
+          <Floor />
+        </group>
 
         {/* </PresentationControls> */}
       </Canvas>
