@@ -9,6 +9,12 @@ import { Polygon, TEST_BUILDING } from "../types";
 import { CHUNG } from "../data";
 import { Text } from "@react-three/drei";
 import { POI, FloorPlan } from "../floorPlan";
+import { UnrealBloomPass } from 'three-stdlib'
+import { Effects } from "@react-three/drei";
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass'
+
+extend({ UnrealBloomPass, OutputPass });
+
 
 const temp = new THREE.Object3D();
 const material = new THREE.MeshPhongMaterial({ color: "red" });
@@ -18,14 +24,20 @@ const polygonMesh = (polygon: Polygon, name: string, height: number, color: stri
   var shape = new THREE.Shape(polygon.points.map((point) => new THREE.Vector2(point.x, point.y)));
   var center = shape.getPoints().reduce((acc, point) => acc.add(point), new THREE.Vector2(0, 0)).divideScalar(shape.getPoints().length);
   var geometry = new THREE.ShapeGeometry(shape);
-  var material = new THREE.MeshBasicMaterial({ color: color });
+  var material = new THREE.MeshPhongMaterial({ color: color });
   material.side = THREE.DoubleSide;
+  material.toneMapped = false;
+  material.emissive = new THREE.Color(color);
+  material.emissiveIntensity = 10;
+  if (color == "green") {
+    material.wireframe = true;
+  }
   geometry.rotateX(Math.PI / 2);
 
   return (
     <>
-      <mesh geometry={geometry} position={[0, height, 0]} material={material} />
-      <Text position={[center.x, height + 2, center.y]} fontSize={5} color="white" anchorX="center" anchorY="middle">
+      <mesh geometry={geometry} position={[0, height - 100, 0]} material={material} />
+      <Text position={[center.x, height - 92, center.y]} fontSize={20} color="white" anchorX="center" anchorY="middle">
         {name}
       </Text>
     </>
@@ -61,8 +73,17 @@ var prevPOI: POI | null = null;
 var nextPOI: POI | null = null;
 
 for (var layer of CHUNG.layers) {
+  for (var point of layer.floor.points) {
+    point.x -= 300;
+    point.y -= 800;
+  }
   for (var room of layer.rooms) {
-    nextPOI = new POI(room.name, [room.polygon.points[0].x, (parseInt(layer.name.slice(0, -1)) - 1) * 50 + 1, room.polygon.points[0].y]);
+    // subtract 100 from each coordinate to center the map
+    for (var point of room.polygon.points) {
+      point.x -= 300;
+      point.y -= 800;
+    }
+    nextPOI = new POI(room.name, [room.polygon.points[0].x, (parseInt(layer.name.slice(0, -1)) - 1) * 50 - 90, room.polygon.points[0].y]);
     console.log(room.polygon.points[0].y);
     floorPlan.addPOI(nextPOI);
     if (prevPOI !== null) {
@@ -117,6 +138,10 @@ function MainPage() {
   return (
     <div className="w-full h-screen">
       <Canvas className="bg-black h-full">
+        <Effects disableGamma>
+          <unrealBloomPass threshold={1} strength={0.3} radius={0.5} />
+          <outputPass args={[THREE.ACESFilmicToneMapping]} />
+        </Effects>
         {
           CHUNG.layers.map((layer, i) => {
             return (
@@ -156,97 +181,3 @@ function MainPage() {
 }
 
 export default MainPage;
-
-// ////
-// /**
-//  * Point container
-//  */
-// export interface Point {
-//   x: number;
-//   y: number;
-// }
-
-// /**
-//  * Polygon container, consists of points
-//  */
-// export interface Polygon {
-//   /**
-//    * Polygon shape specified by points in counter clockwise order.
-//    */
-//   points: Point[];
-// }
-
-// /**
-//  * Container that consists boundary polygon and a name.
-//  */
-// export interface Room {
-//   name: string;
-//   polygon: Polygon;
-// }
-
-// /**
-//  * Container that consists of a floor boundary and many rooms.
-//  */
-// export interface Layer {
-//   name: string;
-//   rooms: Room[];
-//   floor: Polygon;
-// }
-
-// /**
-//  * Container that consists of multiple building layers.
-//  */
-// export interface Building {
-//   name: string;
-//   layers: Layer[];
-// }
-
-// /**
-//  * Utility function that generates a rectangular Polygon
-//  */
-// function rect(x: number, y: number, w: number, h: number) {
-//   return {
-//     points: [
-//       [0, 0],
-//       [1, 0],
-//       [1, 1],
-//       [0, 1],
-//     ].map(([kx, ky]) => ({
-//       x: x + kx * w,
-//       y: y + ky * h,
-//     })),
-//   } as Polygon;
-// }
-
-// /**
-//  * Simple building stub
-//  */
-// export const TEST_BUILDING: Building = {
-//   name: "test",
-//   layers: [
-//     {
-//       name: "1F",
-//       rooms: [
-//         {
-//           name: "kitchen",
-//           polygon: rect(10, 10, 40, 40),
-//         },
-//         {
-//           name: "room",
-//           polygon: rect(50, 50, 40, 40),
-//         },
-//       ],
-//       floor: rect(0, 0, 100, 100),
-//     },
-//     {
-//       name: "2F",
-//       rooms: [
-//         {
-//           name: "room2",
-//           polygon: rect(50, 50, 40, 40),
-//         },
-//       ],
-//       floor: rect(0, 0, 100, 100),
-//     },
-//   ],
-// };
