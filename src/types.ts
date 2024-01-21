@@ -61,7 +61,13 @@ export interface Building {
   offset: Point;
   layers: Layer[];
 }
-// export function createBuilding() {}
+export function createBuilding(name: string, x: number, y: number) {
+  return {
+    name,
+    offset: createPoint(x, y),
+    layers: [createLayer("1F")],
+  };
+}
 
 /**
  * Utility function that generates a rectangular Polygon
