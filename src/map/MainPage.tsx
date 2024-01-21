@@ -5,7 +5,7 @@ import { MapControls } from "@react-three/drei";
 import * as THREE from "three";
 import { Model, aParams } from '../assets/Model'
 import { randFloat } from "three/src/math/MathUtils.js";
-import { Polygon, TEST_BUILDING } from "../types.d";
+import { Polygon, TEST_BUILDING } from "../types";
 import { Text } from "@react-three/drei";
 
 const temp = new THREE.Object3D();
