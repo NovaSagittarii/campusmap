@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { Model, aParams } from '../assets/Model'
 import { randFloat, randInt } from "three/src/math/MathUtils.js";
 import { Polygon, TEST_BUILDING } from "../types";
-import { CHUNG } from "../data";
+import { CHUNG, L1G, L2G } from "../data";
 import { Text } from "@react-three/drei";
 import { POI, FloorPlan } from "../floorPlan";
 import { UnrealBloomPass } from 'three-stdlib'
@@ -69,27 +69,38 @@ function createAParams() {
 }
 
 var floorPlan = new FloorPlan("WCH", []);
-var prevPOI: POI | null = null;
-var nextPOI: POI | null = null;
+
+var POI1F: POI[] = [];
+var POI2F: POI[] = [];
+for (let room of L1G.positions) {
+  var nextPOI = new POI("?", [room.x - 300, -90, room.y - 400]);
+  floorPlan.addPOI(nextPOI);
+  POI1F.push(nextPOI);
+}
+for (let room of L2G.positions) {
+  var nextPOI = new POI("?", [room.x - 300, -40, room.y - 400]);
+  floorPlan.addPOI(nextPOI);
+  POI2F.push(nextPOI);
+}
+for (let path of L1G.edges) {
+  floorPlan.addEdge(POI1F[path[0]], POI1F[path[1]]);
+  floorPlan.addEdge(POI1F[path[1]], POI1F[path[0]]);
+}
+for (let path of L2G.edges) {
+  floorPlan.addEdge(POI2F[path[0]], POI2F[path[1]]);
+  floorPlan.addEdge(POI2F[path[1]], POI2F[path[0]]);
+}
 
 for (var layer of CHUNG.layers) {
   for (var point of layer.floor.points) {
     point.x -= 300;
-    point.y -= 800;
+    point.y -= 400;
   }
   for (var room of layer.rooms) {
-    // subtract 100 from each coordinate to center the map
     for (var point of room.polygon.points) {
       point.x -= 300;
-      point.y -= 800;
+      point.y -= 400;
     }
-    nextPOI = new POI(room.name, [room.polygon.points[0].x, (parseInt(layer.name.slice(0, -1)) - 1) * 50 - 90, room.polygon.points[0].y]);
-    floorPlan.addPOI(nextPOI);
-    if (prevPOI !== null) {
-      floorPlan.addEdge(prevPOI, nextPOI);
-      floorPlan.addEdge(nextPOI, prevPOI);
-    }
-    prevPOI = nextPOI;
   }
 }
 
@@ -168,8 +179,8 @@ function MainPage() {
         <MapControls screenSpacePanning />
 
         <ambientLight intensity={0.5} />
-        <directionalLight color="red" position={[0, 0, 5]} />
-        <directionalLight color="red" position={[0, 5, 5]} />
+        <directionalLight color="white" position={[0, 0, 5]} />
+        <directionalLight color="white" position={[0, 5, 5]} />
 
         {/* </PresentationControls> */}
       </Canvas>
