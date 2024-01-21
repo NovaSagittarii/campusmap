@@ -62,7 +62,12 @@ export function Model({ animationParams, ...props }: ModelProps) {
       bodyRef.current.position.y += Math.min(Math.abs(animationParams.current.velocity[1] * delta), Math.abs(dy)) * Math.sign(dy);
       bodyRef.current.position.z += Math.min(Math.abs(animationParams.current.velocity[2] * delta), Math.abs(dz)) * Math.sign(dz);
 
-      bodyRef.current.rotation.y = Math.atan2(animationParams.current.velocity[0], animationParams.current.velocity[2]) - Math.PI / 2;
+      if (animationParams.current.velocity[0] !== 0 || animationParams.current.velocity[2] !== 0) {
+        bodyRef.current.rotation.y = Math.atan2(animationParams.current.velocity[0], animationParams.current.velocity[2]) - Math.PI / 2;
+      }
+    }
+    else if (animationParams.current.status === "hidden") {
+      bodyRef.current.visible = false;
     }
   });
 

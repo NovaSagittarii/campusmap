@@ -32,7 +32,6 @@ export class FloorPlan {
     }
     this.adjPOIs.get(poi1)?.push(poi2);
     this.adjPOIs.get(poi2)?.push(poi1);
-    console.log(this.adjPOIs);
   }
 
   shortestPath(poi1: POI, poi2: POI) {
@@ -70,6 +69,10 @@ export class FloorPlan {
 
   startPOI() {
     return this.pois[0];
+  }
+
+  setPOIName(poi: POI, name: string) {
+    poi.name = name;
   }
 
   getPOI(name: string) {

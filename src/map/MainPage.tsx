@@ -104,55 +104,94 @@ for (var layer of CHUNG.layers) {
     for (var point of room.polygon.points) {
       point.x -= 300;
       point.y -= 400;
-      // find nearest POI
-      var minDist = Infinity;
-      var minPOI = null;
-      for (var poi of floorPlan.pois) {
-        var dist = Math.sqrt((poi.location[0] - point.x) ** 2 + (poi.location[2] - point.y) ** 2);
-        if (dist < minDist) {
-          minDist = dist;
-          minPOI = poi;
-        }
-      }
-      poi!.name = room.name;
     }
+    var minDist = Infinity;
+    var minPOI = null;
+    var averageX = room.polygon.points.reduce((acc, point) => acc + point.x, 0) / room.polygon.points.length;
+    var averageY = room.polygon.points.reduce((acc, point) => acc + point.y, 0) / room.polygon.points.length;
+    for (var poi of floorPlan.pois) {
+      if (layer === CHUNG.layers[0] && poi.location[1] > -70) continue;
+      if (layer === CHUNG.layers[1] && poi.location[1] < -70) continue;
+      var dist = Math.sqrt((poi.location[0] - averageX) ** 2 + (poi.location[2] - averageY) ** 2);
+      if (dist < minDist) {
+        minDist = dist;
+        minPOI = poi;
+      }
+    }
+    if (minPOI) {
+      floorPlan.setPOIName(minPOI, room.name);
+    }
+    console.log(floorPlan.getPOI(room.name));
   }
 }
 
+var playerModels: JSX.Element[] = [];
+var modelParams: MutableRefObject<aParams>[] = [];
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === " ") {
+    var start = prompt("Starting Location");
+    var end = prompt("Ending Location");
+    var startPOI = floorPlan.pois.find((poi) => poi.name === start);
+    var endPOI = floorPlan.pois.find((poi) => poi.name === end);
+    if (startPOI && endPOI) {
+      console.log(floorPlan.shortestPath(startPOI, endPOI));
+      for (var model of modelParams) {
+        model.current.status = "hidden";
+        model.current.currPOI = null;
+        model.current.targetPOI = null;
+      }
+      modelParams[0].current.currPOI = startPOI;
+      modelParams[0].current.targetPOI = endPOI;
+      modelParams[0].current.destination = startPOI.location;
+      modelParams[0].current.trueDestination = endPOI.location;
+      modelParams[0].current.status = "moveTo";
+    }
+  }
+});
+
 function MainPage() {
-  var tests = [...new Array(100)].map((_) => {
+
+  const [visibility, setVisibility] = useState<boolean[]>([true, true]);
+  modelParams = [...new Array(100)].map((_) => {
     return useRef<aParams>(createAParams());
   });
+  playerModels = [...new Array(100)].map((_, i) => <Model position={[(i % 5) * 5, 1, Math.floor(i / 25) * 5]} animationParams={modelParams[i]} key={i} scale={10} />)
+
   // for (var i = 0; i < tests.length; i++) {
   //   tests[i].current.rotationForce = [randFloat(-0.1, 0.1), randFloat(-0.1, 0.1), randFloat(-0.1, 0.1)];
   // }
   setInterval(() => {
-    for (var i = 0; i < tests.length; i++) {
+    for (var i = 0; i < modelParams.length; i++) {
       // tests[i].current.rotationForce = [randFloat(-0.1, 0.1), randFloat(-0.1, 0.1), randFloat(-0.1, 0.1)];
-      if (tests[i].current.status === "idle") {
-        tests[i].current.status = "moveTo";
-        var currPOI = tests[i].current.currPOI;
-        var targetPOI = tests[i].current.targetPOI;
+      if (modelParams[i].current.status === "idle") {
+        modelParams[i].current.status = "moveTo";
+        var currPOI = modelParams[i].current.currPOI;
+        var targetPOI = modelParams[i].current.targetPOI;
         if (currPOI === null) {
           currPOI = floorPlan.startPOI();
           targetPOI = floorPlan.startPOI();
-          tests[i].current.currPOI = currPOI;
-          tests[i].current.targetPOI = targetPOI;
-          tests[i].current.destination = currPOI.location;
-          tests[i].current.trueDestination = targetPOI.location;
+          modelParams[i].current.currPOI = currPOI;
+          modelParams[i].current.targetPOI = targetPOI;
+          modelParams[i].current.destination = currPOI.location;
+          modelParams[i].current.trueDestination = targetPOI.location;
         }
         else if (currPOI === targetPOI) {
+          if (i === 0 && modelParams[1].current.status === "hidden") {
+            modelParams[i].current.status = "stop";
+            break;
+          }
           targetPOI = floorPlan.randPOI();
-          tests[i].current.targetPOI = targetPOI;
+          modelParams[i].current.targetPOI = targetPOI;
           currPOI = floorPlan.nextInPath(currPOI, targetPOI);
-          tests[i].current.currPOI = currPOI;
-          tests[i].current.destination = currPOI.location;
-          tests[i].current.trueDestination = targetPOI.location;
+          modelParams[i].current.currPOI = currPOI;
+          modelParams[i].current.destination = currPOI.location;
+          modelParams[i].current.trueDestination = targetPOI.location;
         } else {
           currPOI = floorPlan.nextInPath(currPOI, targetPOI);
-          tests[i].current.currPOI = currPOI;
-          tests[i].current.destination = currPOI.location;
-          tests[i].current.trueDestination = targetPOI.location;
+          modelParams[i].current.currPOI = currPOI;
+          modelParams[i].current.destination = currPOI.location;
+          modelParams[i].current.trueDestination = targetPOI.location;
         }
       }
     }
@@ -168,7 +207,7 @@ function MainPage() {
         {
           CHUNG.layers.map((layer, i) => {
             return (
-              <group key={i}>
+              <group key={i} visible={visibility[i]} onPointerDown={() => setVisibility((prev) => prev.map((_, j) => j === i ? false : prev[j]))} onPointerUp={() => setVisibility((prev) => prev.map((_, j) => j === i ? true : prev[j]))}>
                 {polygonMesh(layer.floor, layer.name, i * 50, "darkred")}
                 <group>
                   {
@@ -186,7 +225,7 @@ function MainPage() {
           })
         }
         {
-          [...new Array(100)].map((_, i) => <Model position={[(i % 5) * 5, 1, Math.floor(i / 25) * 5]} animationParams={tests[i]} key={i} scale={10} />)
+          playerModels
         }
         <Perf />
         {/* <PerspectiveCamera makeDefault /> */}
