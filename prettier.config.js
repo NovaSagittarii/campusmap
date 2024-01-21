@@ -6,7 +6,7 @@ const config = {
   useTabs: false,
   semi: true,
   singleQuote: false,
-  jsxSingleQuote: true,
+  jsxSingleQuote: false,
   trailingComma: "all",
   arrowParens: "always",
   proseWrap: "preserve",
