@@ -15,7 +15,7 @@ export class aParams {
   currPOI: POI | null = null;
   targetPOI: POI | null = null;
   velocity: [number, number, number] = [0, 0, 0];
-  maxVelocity: number = 100;
+  maxVelocity: number = 200;
   rotationForce: [number, number, number] = [0, 0, 0];
   headRotationForce: [number, number, number] = [0, 0, 0];
   status: string = "idle";

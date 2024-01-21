@@ -112,7 +112,7 @@ function MainPage() {
         }
       }
     }
-  }, 2000);
+  }, 100);
 
   return (
     <div className="w-full h-screen">
