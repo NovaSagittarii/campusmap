@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { Model, aParams } from '../assets/Model'
 import { randFloat, randInt } from "three/src/math/MathUtils.js";
 import { Polygon, TEST_BUILDING } from "../types";
-import { CHUNG } from "../data";
+import { CHUNG, L1G, L2G, L12GS } from "../data";
 import { Text } from "@react-three/drei";
 import { POI, FloorPlan } from "../floorPlan";
 import { UnrealBloomPass } from 'three-stdlib'
@@ -39,9 +39,9 @@ const polygonMesh = (polygon: Polygon, name: string, height: number, color: stri
   return (
     <>
       <mesh geometry={geometry} position={[0, height - 100, 0]} material={material} />
-      <Text position={[center.x, height - 92, center.y]} fontSize={20} color="black" anchorX="center" anchorY="middle">
+      <Text position={[center.x, height - 105, center.y]} fontSize={20} color="white" anchorX="center" anchorY="bottom" maxWidth={100} lineHeight={1} >
         {name}
-      </Text>
+      </Text >
     </>
   );
 }
@@ -71,27 +71,53 @@ function createAParams() {
 }
 
 var floorPlan = new FloorPlan("WCH", []);
-var prevPOI: POI | null = null;
-var nextPOI: POI | null = null;
+
+var POI1F: POI[] = [];
+var POI2F: POI[] = [];
+for (let room of L1G.positions) {
+  var nextPOI = new POI("?", [room.x - 300, -90, room.y - 400]);
+  floorPlan.addPOI(nextPOI);
+  POI1F.push(nextPOI);
+}
+for (let room of L2G.positions) {
+  var nextPOI = new POI("?", [room.x - 300, -40, room.y - 400]);
+  floorPlan.addPOI(nextPOI);
+  POI2F.push(nextPOI);
+}
+for (let path of L1G.edges) {
+  floorPlan.addEdge(POI1F[path[0]], POI1F[path[1]]);
+  floorPlan.addEdge(POI1F[path[1]], POI1F[path[0]]);
+}
+for (let path of L2G.edges) {
+  floorPlan.addEdge(POI2F[path[0]], POI2F[path[1]]);
+  floorPlan.addEdge(POI2F[path[1]], POI2F[path[0]]);
+}
+for (let path of L12GS) {
+  floorPlan.addEdge(POI1F[path[0]], POI2F[path[1]]);
+  floorPlan.addEdge(POI2F[path[1]], POI1F[path[0]]);
+}
 
 for (var layer of CHUNG.layers) {
   for (var point of layer.floor.points) {
     point.x -= 300;
-    point.y -= 800;
+    point.y -= 400;
   }
   for (var room of layer.rooms) {
-    // subtract 100 from each coordinate to center the map
     for (var point of room.polygon.points) {
       point.x -= 300;
-      point.y -= 800;
+      point.y -= 400;
+      // find nearest POI
+      var minDist = Infinity;
+      var minPOI = null;
+      for (var poi of floorPlan.pois) {
+        var dist = Math.sqrt((poi.location[0] - point.x) ** 2 + (poi.location[2] - point.y) ** 2);
+        if (dist < minDist) {
+          minDist = dist;
+          minPOI = poi;
+        }
+      }
+      poi!.name = room.name;
     }
-    nextPOI = new POI(room.name, [room.polygon.points[0].x, (parseInt(layer.name.slice(0, -1)) - 1) * 50 - 90, room.polygon.points[0].y]);
-    floorPlan.addPOI(nextPOI);
-    if (prevPOI !== null) {
-      floorPlan.addEdge(prevPOI, nextPOI);
-      floorPlan.addEdge(nextPOI, prevPOI);
-    }
-    prevPOI = nextPOI;
   }
 }
 
@@ -170,8 +196,8 @@ function MainPage() {
         <MapControls screenSpacePanning />
 
         <ambientLight intensity={0.5} />
-        <directionalLight color="red" position={[0, 0, 5]} />
-        <directionalLight color="red" position={[0, 5, 5]} />
+        <directionalLight color="white" position={[0, 0, 5]} />
+        <directionalLight color="white" position={[0, 5, 5]} />
         <Dome />
         <group position={[0, -105, 0]} rotation={[-Math.PI/2, 0, 0]}>
           <Floor />

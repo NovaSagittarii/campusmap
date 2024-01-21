@@ -71,4 +71,13 @@ export class FloorPlan {
   startPOI() {
     return this.pois[0];
   }
+
+  getPOI(name: string) {
+    for (var poi of this.pois) {
+      if (poi.name === name) {
+        return poi;
+      }
+    }
+    return null;
+  }
 }
