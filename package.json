@@ -11,8 +11,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@pixi/react": "^7.1.1",
     "@react-three/drei": "^9.96.1",
     "@react-three/fiber": "^8.15.14",
+    "pixi.js": "^7.3.3",
     "r3f-perf": "^7.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
