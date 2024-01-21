@@ -185,6 +185,17 @@ function MainPage() {
     for (var i = 0; i < modelParams.length; i++) {
       modelParams[i].current.status = "hidden";
     }
+    navigator.geolocation.watchPosition(showPosition, (err) => console.log(err), { enableHighAccuracy: true, maximumAge: 0, timeout: Infinity });
+  } else {
+    specialParams[0].current.status = "hidden";
+  }
+  function showPosition(position: GeolocationPosition) {
+    var x = getPos(position.coords.latitude, position.coords.longitude)[0];
+    var y = getPos(position.coords.latitude, position.coords.longitude)[1];
+    console.log(position.coords.latitude, position.coords.longitude);
+    console.log(x, y);
+    specialParams[0].current.status = "moveTo";
+    specialParams[0].current.destination = [x, -90, y];
   }
 
   function getPos(x: number, y: number) {
@@ -230,15 +241,6 @@ function MainPage() {
     }
   }, 100);
 
-  navigator.geolocation.watchPosition(showPosition, (err) => console.log(err), { enableHighAccuracy: true, maximumAge: 0, timeout: Infinity });
-  function showPosition(position: GeolocationPosition) {
-    var x = getPos(position.coords.latitude, position.coords.longitude)[0];
-    var y = getPos(position.coords.latitude, position.coords.longitude)[1];
-    console.log(position.coords.latitude, position.coords.longitude);
-    console.log(x, y);
-    specialParams[0].current.status = "moveTo";
-    specialParams[0].current.destination = [x, -90, y];
-  }
   return (
     <div className="w-full h-screen">
       <Canvas className="bg-black h-full">
