@@ -12,10 +12,12 @@ const temp = new THREE.Object3D();
 const material = new THREE.MeshPhongMaterial({ color: "red" });
 material.side = THREE.DoubleSide;
 const geometry = new THREE.SphereGeometry(1.0);
-const polygonMesh = (polygon: Polygon, name: string, height: number) => {
+const polygonMesh = (polygon: Polygon, name: string, height: number, color: string) => {
   var shape = new THREE.Shape(polygon.points.map((point) => new THREE.Vector2(point.x, point.y)));
   var center = shape.getPoints().reduce((acc, point) => acc.add(point), new THREE.Vector2(0, 0)).divideScalar(shape.getPoints().length);
   var geometry = new THREE.ShapeGeometry(shape);
+  var material = new THREE.MeshBasicMaterial({ color: color });
+  material.side = THREE.DoubleSide;
   geometry.rotateX(Math.PI / 2);
 
   return (
@@ -79,13 +81,13 @@ function MainPage() {
           TEST_BUILDING.layers.map((layer, i) => {
             return (
               <group key={i}>
-                {polygonMesh(layer.floor, layer.name, i * 50)}
+                {polygonMesh(layer.floor, layer.name, i * 50, "red")}
                 <group>
                   {
                     layer.rooms.map((room, j) => {
                       return (
                         <group key={j}>
-                          {polygonMesh(room.polygon, room.name, i * 50 + 20)}
+                          {polygonMesh(room.polygon, room.name, i * 50 + 5, "green")}
                         </group>
                       );
                     })
