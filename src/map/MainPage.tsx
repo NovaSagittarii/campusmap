@@ -3,7 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Perf } from "r3f-perf";
 import { MapControls } from "@react-three/drei";
 import * as THREE from "three";
-import { Model } from '../assets/Model'
+import { Model } from "../assets/Model";
 
 const temp = new THREE.Object3D();
 const material = new THREE.MeshPhongMaterial({ color: "red" });
