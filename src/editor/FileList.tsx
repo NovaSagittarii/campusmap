@@ -9,7 +9,8 @@ import ExternalFile from "./File";
 function FileList() {
   const { files, setFiles } = useContext(EditorContext);
   return (
-    <div className="flex flex-col bg-blue-300 rounded-md w-48 p-4 gap-4">
+    <div className="fixed left-0 top-0 flex flex-col bg-blue-300 rounded-md w-48 p-4 gap-4 max-h-14 hover:max-h-full overflow-hidden transition-all">
+      {"External files"}
       <input
         className="bg-white/20 p-4 rounded-sm"
         type="file"
@@ -19,13 +20,7 @@ function FileList() {
           for (const file of uploadedFiles) {
             const { name } = file;
             const base64 = (await blobToBase64(file)) as string;
-            setFiles([
-              ...files,
-              {
-                name,
-                base64,
-              },
-            ]);
+            setFiles([...files, { name, base64, }]); // prettier-ignore
           }
         }}
       ></input>
