@@ -6,14 +6,7 @@ import { P5EditorGraph } from "./editor2/P5EditorGraph";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/editor" element={<Editor />} />
-        <Route path="/editor2" element={<P5Editor />} />
-        <Route path="/editorGraph" element={<P5EditorGraph />} />
-      </Routes>
-    </BrowserRouter>
+    <MainPage />
   );
 }
 
