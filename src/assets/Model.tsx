@@ -8,15 +8,15 @@ import { ThreeElements } from "@react-three/fiber";
 import { useFrame } from "@react-three/fiber";
 
 export type aParams = {
-  bodyRotationX: 0;
-  bodyRotationY: 0;
-  bodyRotationZ: 0;
-  headRotationX: 0;
-  headRotationY: 0;
-  headRotationZ: 0;
-  hairRotationX: 0;
-  hairRotationY: 0;
-  hairRotationZ: 0;
+  bodyRotationX: number;
+  bodyRotationY: number;
+  bodyRotationZ: number;
+  headRotationX: number;
+  headRotationY: number;
+  headRotationZ: number;
+  hairRotationX: number;
+  hairRotationY: number;
+  hairRotationZ: number;
 }
 
 type ModelProps = ThreeElements["mesh"] & {
@@ -37,9 +37,9 @@ export function Model({ animationParams, ...props }: ModelProps) {
     // hairRef.current.rotation.y += 0.01;
     // hairRef.current.rotation.x += 0.01;
     // hairRef.current.rotation.z += 0.01;
-    bodyRef.current.rotation.x = animationParams.current.bodyRotationX;
-    bodyRef.current.rotation.y = animationParams.current.bodyRotationY;
-    bodyRef.current.rotation.z = animationParams.current.bodyRotationZ;
+    bodyRef.current.rotation.x += animationParams.current.bodyRotationX;
+    bodyRef.current.rotation.y += animationParams.current.bodyRotationY;
+    bodyRef.current.rotation.z += animationParams.current.bodyRotationZ;
   });
 
   return (

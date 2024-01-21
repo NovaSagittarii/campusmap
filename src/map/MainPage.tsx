@@ -4,6 +4,7 @@ import { Perf } from "r3f-perf";
 import { MapControls } from "@react-three/drei";
 import * as THREE from "three";
 import { Model, aParams } from '../assets/Model'
+import { randFloat } from "three/src/math/MathUtils.js";
 
 const temp = new THREE.Object3D();
 const material = new THREE.MeshPhongMaterial({ color: "red" });
@@ -29,34 +30,42 @@ const Balls = ({ locations }: { locations: [number, number][] }) => {
   );
 };
 
+function createAParams() {
+  return {
+    bodyRotationX: 0,
+    bodyRotationY: 0,
+    bodyRotationZ: 0,
+    headRotationX: 0,
+    headRotationY: 0,
+    headRotationZ: 0,
+    hairRotationX: 0,
+    hairRotationY: 0,
+    hairRotationZ: 0,
+  } as aParams;
+}
+
 function MainPage() {
   var tests = [...new Array(100)].map((_, i) => {
-    return useRef<aParams>({
-      bodyRotationX: 0,
-      bodyRotationY: 0,
-      bodyRotationZ: 0,
-      headRotationX: 0,
-      headRotationY: 0,
-      headRotationZ: 0,
-      hairRotationX: 0,
-      hairRotationY: 0,
-      hairRotationZ: 0,
-    })
+    return useRef<aParams>(createAParams());
   });
+  for (var i = 0; i < tests.length; i++) {
+    tests[i].current.bodyRotationX = randFloat(-0.1, 0.1);
+    tests[i].current.bodyRotationY = randFloat(-0.1, 0.1);
+    tests[i].current.bodyRotationZ = randFloat(-0.1, 0.1);
+  }
   setInterval(() => {
-    tests.forEach((test) => {
-      if (!test.current) return;
-      test.current.bodyRotationX += 0.01;
-      test.current.bodyRotationY += 0.01;
-      test.current.bodyRotationZ += 0.01;
-    });
-  }, 10);
+    for (var i = 0; i < tests.length; i++) {
+      tests[i].current.bodyRotationX = randFloat(-0.1, 0.1);
+      tests[i].current.bodyRotationY = randFloat(-0.1, 0.1);
+      tests[i].current.bodyRotationZ = randFloat(-0.1, 0.1);
+    }
+  }, 10000);
 
   return (
     <div className="w-full h-screen">
       <Canvas className="bg-black h-full">
         {
-          [...new Array(100)].map((_, i) => <Model position={[0, i * 5, 0]} animationParams={tests[i]} />)
+          [...new Array(100)].map((_, i) => <Model position={[(i % 5) * 5, Math.floor(i / 5) * 5, 0]} animationParams={tests[i]} key={i} />)
         }
         <Perf />
         {/* <PerspectiveCamera makeDefault /> */}
