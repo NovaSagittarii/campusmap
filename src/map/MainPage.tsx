@@ -84,7 +84,6 @@ for (var layer of CHUNG.layers) {
       point.y -= 800;
     }
     nextPOI = new POI(room.name, [room.polygon.points[0].x, (parseInt(layer.name.slice(0, -1)) - 1) * 50 - 90, room.polygon.points[0].y]);
-    console.log(room.polygon.points[0].y);
     floorPlan.addPOI(nextPOI);
     if (prevPOI !== null) {
       floorPlan.addEdge(prevPOI, nextPOI);
@@ -93,8 +92,6 @@ for (var layer of CHUNG.layers) {
     prevPOI = nextPOI;
   }
 }
-
-console.log(floorPlan.startPOI());
 
 function MainPage() {
   var tests = [...new Array(100)].map((_) => {
