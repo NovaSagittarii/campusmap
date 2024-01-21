@@ -29,7 +29,7 @@ export function Model({ animationParams, ...props }: ModelProps) {
   const headRef = useRef<THREE.Mesh>(null);
   const bodyRef = useRef<THREE.Mesh>(null);
   const hairRef = useRef<THREE.Mesh>(null);
-  const { nodes, materials } = useGLTF("/playermodel.gltf");
+  const { nodes, materials } = useGLTF("./playermodel.gltf");
 
   useFrame((_, delta) => {
     if (!headRef.current || !bodyRef.current || !hairRef.current) return;
@@ -95,4 +95,4 @@ export function Model({ animationParams, ...props }: ModelProps) {
   );
 }
 
-useGLTF.preload("/playerModel.gltf");
+useGLTF.preload("./playerModel.gltf");
