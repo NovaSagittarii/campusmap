@@ -179,6 +179,14 @@ function MainPage() {
 
   // Calculated 0 0 = 33.9753793169212925, 117.32600514595549125
 
+  var touchDevice = ('ontouchstart' in document.documentElement);
+
+  if (touchDevice) {
+    for (var i = 0; i < modelParams.length; i++) {
+      modelParams[i].current.status = "hidden";
+    }
+  }
+
   function getPos(x: number, y: number) {
     return [(x - 33.975078895556415) * 300 / (33.975078895556415 - 33.97567973828617) + 150, (y + 117.32588988719304) * -400 / (117.32588988719304 - 117.32640214835949) + 90];
   }
