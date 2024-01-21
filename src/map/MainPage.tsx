@@ -11,11 +11,10 @@ import { Text } from "@react-three/drei";
 import { POI, FloorPlan } from "../floorPlan";
 import { UnrealBloomPass } from 'three-stdlib'
 import { Effects } from "@react-three/drei";
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass'
 import Dome from "./Dome";
 import Floor from "./Floor";
 
-extend({ UnrealBloomPass, OutputPass });
+extend({ UnrealBloomPass });
 
 
 const temp = new THREE.Object3D();
@@ -204,7 +203,6 @@ function MainPage() {
       <Canvas className="bg-black h-full">
         <Effects disableGamma>
           <unrealBloomPass threshold={1} strength={0.3} radius={0.5} />
-          <outputPass args={[THREE.ACESFilmicToneMapping]} />
         </Effects>
         {
           CHUNG.layers.map((layer, i) => {
