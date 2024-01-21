@@ -4,9 +4,11 @@ import { Perf } from "r3f-perf";
 import { MapControls } from "@react-three/drei";
 import * as THREE from "three";
 import { Model, aParams } from '../assets/Model'
-import { randFloat } from "three/src/math/MathUtils.js";
+import { randFloat, randInt } from "three/src/math/MathUtils.js";
 import { Polygon, TEST_BUILDING } from "../types";
+import { CHUNG } from "../data";
 import { Text } from "@react-three/drei";
+import { POI, FloorPlan } from "../floorPlan";
 
 const temp = new THREE.Object3D();
 const material = new THREE.MeshPhongMaterial({ color: "red" });
@@ -54,31 +56,69 @@ function createAParams() {
   return new aParams();
 }
 
+var floorPlan = new FloorPlan("WCH", []);
+var prevPOI: POI | null = null;
+var nextPOI: POI | null = null;
+
+for (var layer of CHUNG.layers) {
+  for (var room of layer.rooms) {
+    nextPOI = new POI(room.name, [room.polygon.points[0].x, (parseInt(layer.name.slice(0, -1)) - 1) * 50 + 1, room.polygon.points[0].y]);
+    console.log(room.polygon.points[0].y);
+    floorPlan.addPOI(nextPOI);
+    if (prevPOI !== null) {
+      floorPlan.addEdge(prevPOI, nextPOI);
+      floorPlan.addEdge(nextPOI, prevPOI);
+    }
+    prevPOI = nextPOI;
+  }
+}
+
+console.log(floorPlan.startPOI());
+
 function MainPage() {
   var tests = [...new Array(100)].map((_) => {
     return useRef<aParams>(createAParams());
   });
-  for (var i = 0; i < tests.length; i++) {
-    tests[i].current.rotationForce = [randFloat(-0.1, 0.1), randFloat(-0.1, 0.1), randFloat(-0.1, 0.1)];
-  }
+  // for (var i = 0; i < tests.length; i++) {
+  //   tests[i].current.rotationForce = [randFloat(-0.1, 0.1), randFloat(-0.1, 0.1), randFloat(-0.1, 0.1)];
+  // }
   setInterval(() => {
-    var count = 0;
     for (var i = 0; i < tests.length; i++) {
-      tests[i].current.rotationForce = [randFloat(-0.1, 0.1), randFloat(-0.1, 0.1), randFloat(-0.1, 0.1)];
+      // tests[i].current.rotationForce = [randFloat(-0.1, 0.1), randFloat(-0.1, 0.1), randFloat(-0.1, 0.1)];
       if (tests[i].current.status === "idle") {
-        tests[i].current.destination = [randFloat(-100, 100), randFloat(-100, 100), randFloat(-100, 100)];
         tests[i].current.status = "moveTo";
-        ++count;
+        var currPOI = tests[i].current.currPOI;
+        var targetPOI = tests[i].current.targetPOI;
+        if (currPOI === null) {
+          currPOI = floorPlan.startPOI();
+          targetPOI = floorPlan.startPOI();
+          tests[i].current.currPOI = currPOI;
+          tests[i].current.targetPOI = targetPOI;
+          tests[i].current.destination = currPOI.location;
+          tests[i].current.trueDestination = targetPOI.location;
+        }
+        else if (currPOI === targetPOI) {
+          targetPOI = floorPlan.randPOI();
+          tests[i].current.targetPOI = targetPOI;
+          currPOI = floorPlan.nextInPath(currPOI, targetPOI);
+          tests[i].current.currPOI = currPOI;
+          tests[i].current.destination = currPOI.location;
+          tests[i].current.trueDestination = targetPOI.location;
+        } else {
+          currPOI = floorPlan.nextInPath(currPOI, targetPOI);
+          tests[i].current.currPOI = currPOI;
+          tests[i].current.destination = currPOI.location;
+          tests[i].current.trueDestination = targetPOI.location;
+        }
       }
     }
-    console.log(count);
-  }, 5000);
+  }, 2000);
 
   return (
     <div className="w-full h-screen">
       <Canvas className="bg-black h-full">
         {
-          TEST_BUILDING.layers.map((layer, i) => {
+          CHUNG.layers.map((layer, i) => {
             return (
               <group key={i}>
                 {polygonMesh(layer.floor, layer.name, i * 50, "darkred")}
@@ -98,7 +138,7 @@ function MainPage() {
           })
         }
         {
-          [...new Array(100)].map((_, i) => <Model position={[(i % 5) * 5, Math.floor(((i / 5)) % 5) * 5, Math.floor(i / 25) * 5]} animationParams={tests[i]} key={i} />)
+          [...new Array(100)].map((_, i) => <Model position={[(i % 5) * 5, 1, Math.floor(i / 25) * 5]} animationParams={tests[i]} key={i} scale={10} />)
         }
         <Perf />
         {/* <PerspectiveCamera makeDefault /> */}

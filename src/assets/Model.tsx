@@ -7,11 +7,15 @@ import { useGLTF } from "@react-three/drei";
 import { ThreeElements } from "@react-three/fiber";
 import { useFrame } from "@react-three/fiber";
 import { func } from "three/examples/jsm/nodes/Nodes.js";
+import { POI } from "../floorPlan";
 
 export class aParams {
   destination: [number, number, number] = [0, 0, 0];
+  trueDestination: [number, number, number] = [0, 0, 0];
+  currPOI: POI | null = null;
+  targetPOI: POI | null = null;
   velocity: [number, number, number] = [0, 0, 0];
-  maxVelocity: number = 10;
+  maxVelocity: number = 100;
   rotationForce: [number, number, number] = [0, 0, 0];
   headRotationForce: [number, number, number] = [0, 0, 0];
   status: string = "idle";
@@ -43,7 +47,7 @@ export function Model({ animationParams, ...props }: ModelProps) {
       const dy = animationParams.current.destination[1] - bodyRef.current.position.y;
       const dz = animationParams.current.destination[2] - bodyRef.current.position.z;
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      if (dist > 1) {
+      if (dist > 0.001) {
         // use delta time clock.getDelta()
         const vx = dx / dist * animationParams.current.maxVelocity;
         const vy = dy / dist * animationParams.current.maxVelocity;
