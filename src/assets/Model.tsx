@@ -39,9 +39,9 @@ export function Model({ animationParams, ...props }: ModelProps) {
     // hairRef.current.rotation.y += 0.01;
     // hairRef.current.rotation.x += 0.01;
     // hairRef.current.rotation.z += 0.01;
-    // bodyRef.current.rotation.x += animationParams.current.rotationForce[0];
-    // bodyRef.current.rotation.y += animationParams.current.rotationForce[1];
-    // bodyRef.current.rotation.z += animationParams.current.rotationForce[2];
+    bodyRef.current.rotation.x += animationParams.current.rotationForce[0];
+    bodyRef.current.rotation.y += animationParams.current.rotationForce[1];
+    bodyRef.current.rotation.z += animationParams.current.rotationForce[2];
     if (animationParams.current.status === "moveTo") {
       const dx = animationParams.current.destination[0] - bodyRef.current.position.x;
       const dy = animationParams.current.destination[1] - bodyRef.current.position.y;

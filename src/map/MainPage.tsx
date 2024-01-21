@@ -166,6 +166,11 @@ function MainPage() {
     if (e.key === "=") {
       if (bgVisible) {
         setBgVisible(false);
+        setInterval(() => {
+          for (var i = 0; i < modelParams.length; i++) {
+            modelParams[i].current.rotationForce = [randFloat(-1, 1), randFloat(-1, 1), randFloat(-1, 1)];
+          }
+        }, 2000);
       }
     }
   });
