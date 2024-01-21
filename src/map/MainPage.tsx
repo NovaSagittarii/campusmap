@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { extend, Canvas, useFrame } from "@react-three/fiber";
 import { Perf } from "r3f-perf";
 import { MapControls } from "@react-three/drei";
@@ -128,6 +128,8 @@ for (var layer of CHUNG.layers) {
 
 var playerModels: JSX.Element[] = [];
 var modelParams: MutableRefObject<aParams>[] = [];
+var specialModels: JSX.Element[] = [];
+var specialParams: MutableRefObject<aParams>[] = [];
 
 document.addEventListener("keydown", (e) => {
   if (e.key === " ") {
@@ -149,6 +151,9 @@ document.addEventListener("keydown", (e) => {
       modelParams[0].current.status = "moveTo";
     }
   }
+  if (e.key === "g") {
+    getLocation();
+  }
 });
 
 function MainPage() {
@@ -158,6 +163,25 @@ function MainPage() {
     return useRef<aParams>(createAParams());
   });
   playerModels = [...new Array(100)].map((_, i) => <Model position={[(i % 5) * 5, 1, Math.floor(i / 25) * 5]} animationParams={modelParams[i]} key={i} scale={10} />)
+  specialParams = [...new Array(1)].map((_) => {
+    return useRef<aParams>(createAParams());
+  });
+  specialModels = [...new Array(1)].map((_, i) => <Model position={[0, 0, 0]} animationParams={specialParams[i]} key={i + 200} scale={10} />)
+
+  // MAPPING
+  // 150 90 = 33.975078895556415, -117.32588988719304
+  // -150 -310 = 33.97567973828617, -117.32640214835949
+
+  //33.9751827 -117.3258789
+  //33.9755312 -117.3262617
+
+
+
+  // Calculated 0 0 = 33.9753793169212925, 117.32600514595549125
+
+  function getPos(x: number, y: number) {
+    return [(x - 33.975078895556415) * 300 / (33.975078895556415 - 33.97567973828617) + 150, (y + 117.32588988719304) * -400 / (117.32588988719304 - 117.32640214835949) + 90];
+  }
 
   // for (var i = 0; i < tests.length; i++) {
   //   tests[i].current.rotationForce = [randFloat(-0.1, 0.1), randFloat(-0.1, 0.1), randFloat(-0.1, 0.1)];
@@ -198,6 +222,15 @@ function MainPage() {
     }
   }, 100);
 
+  navigator.geolocation.watchPosition(showPosition, (err) => console.log(err), { enableHighAccuracy: true, maximumAge: 0, timeout: Infinity });
+  function showPosition(position: GeolocationPosition) {
+    var x = getPos(position.coords.latitude, position.coords.longitude)[0];
+    var y = getPos(position.coords.latitude, position.coords.longitude)[1];
+    console.log(position.coords.latitude, position.coords.longitude);
+    console.log(x, y);
+    specialParams[0].current.status = "moveTo";
+    specialParams[0].current.destination = [x, -90, y];
+  }
   return (
     <div className="w-full h-screen">
       <Canvas className="bg-black h-full">
@@ -226,6 +259,9 @@ function MainPage() {
         }
         {
           playerModels
+        }
+        {
+          specialModels
         }
         <Perf />
         {/* <PerspectiveCamera makeDefault /> */}
